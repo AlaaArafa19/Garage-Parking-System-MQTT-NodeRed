@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "author": "Alaa Mohammed",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-pi-pico-w", "id": "pico", "top": 0, "left": 0, "attrs": {} },
+    {
+      "type": "wokwi-led",
+      "id": "led1",
+      "top": 25.2,
+      "left": -236.2,
+      "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led2",
+      "top": 130.8,
+      "left": -245.8,
+      "attrs": { "color": "red" }
+    },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd1",
+      "top": -147.2,
+      "left": -119.2,
+      "attrs": { "pins": "i2c" }
+    },
+    { "type": "board-mfrc522", "id": "rfid1", "top": 16.55, "left": 233.84, "attrs": {} },
+    {
+      "type": "wokwi-hc-sr04",
+      "id": "ultrasonic1",
+      "top": 183.9,
+      "left": 264.7,
+      "attrs": { "distance": "13" }
+    },
+    {
+      "type": "wokwi-pir-motion-sensor",
+      "id": "pir1",
+      "top": 138.4,
+      "left": -141.78,
+      "attrs": {}
+    },
+    { "type": "wokwi-pir-motion-sensor", "id": "pir2", "top": 23.2, "left": -141.78, "attrs": {} },
+    { "type": "wokwi-servo", "id": "servo1", "top": -98, "left": 240, "attrs": {} }
+  ],
+  "connections": [
+    [ "ultrasonic1:VCC", "pico:VBUS", "red", [ "v-9.6", "h-192", "v-230.4" ] ],
+    [ "pir2:GND", "pico:GND.1", "black", [ "v0", "h38.14", "v-57.6" ] ],
+    [ "pir1:GND", "pico:GND.1", "black", [ "v0", "h38.14", "v-172.8" ] ],
+    [ "pir2:VCC", "pico:VBUS", "red", [ "v0", "h-38.4", "v-96", "h249.6" ] ],
+    [ "pir1:VCC", "pico:VBUS", "red", [ "v9.6", "h-38.4", "v-220.8", "h249.6" ] ],
+    [ "led1:C", "pico:GND.1", "black", [ "v38.4", "h163.6", "v-48" ] ],
+    [ "led2:C", "pico:GND.1", "black", [ "v9.6", "h-9.2", "v-57.6", "h182.4", "v-67.2" ] ],
+    [ "servo1:V+", "pico:VBUS", "red", [ "h-38.4", "v76.9", "h-96" ] ],
+    [ "servo1:GND", "pico:GND.8", "black", [ "h-48", "v115.2" ] ],
+    [ "lcd1:GND", "servo1:GND", "black", [ "h-19.2", "v-38.4", "h364.8" ] ],
+    [ "lcd1:VCC", "servo1:V+", "red", [ "h-28.8", "v-57.5", "h374.4", "v124.8" ] ],
+    [ "rfid1:GND", "pico:GND.8", "black", [ "h-48", "v-48" ] ],
+    [
+      "ultrasonic1:GND",
+      "pico:GND.8",
+      "black",
+      [ "v28.8", "h-145.2", "v-172.8", "h0", "v-28.8", "h-38.4", "v0", "h9.6", "v-48" ]
+    ],
+    [ "led2:A", "pico:GP10", "purple", [ "v0" ] ],
+    [ "led1:A", "pico:GP7", "green", [ "v0" ] ],
+    [ "lcd1:SDA", "pico:GP2", "blue", [ "h-9.6", "v96.2", "h134.4", "v67.2" ] ],
+    [ "lcd1:SCL", "pico:GP3", "cyan", [ "h-19.2", "v96.3", "h134.4", "v67.2" ] ],
+    [ "rfid1:SCK", "pico:GP14", "limegreen", [ "h-76.8", "v163.2", "h-134.4", "v-19.2" ] ],
+    [ "rfid1:MISO", "pico:GP12", "yellow", [ "h-28.8", "v163.2", "h-192", "v-67.2" ] ],
+    [ "rfid1:MOSI", "pico:GP15", "#8f4814", [ "h-48", "v163.2", "h-153.6" ] ],
+    [ "rfid1:3.3V", "pico:3V3", "red", [ "h-115.2", "v-48", "h-9.6" ] ],
+    [
+      "rfid1:SDA",
+      "pico:GP13",
+      "blue",
+      [ "h-19.2", "v0", "h-19.2", "v201.6", "h-192", "v-67.2" ]
+    ],
+    [ "rfid1:RST", "pico:GP22", "gray", [ "h-105.6", "v38.4" ] ],
+    [ "servo1:PWM", "pico:GP4", "orange", [ "h-19.2", "v38.6", "h-201.6", "v76.8" ] ],
+    [ "pir1:OUT", "pico:GP6", "white", [ "v9.6", "h95.86", "v-124.8" ] ],
+    [ "pir2:OUT", "pico:GP5", "white", [ "v19.2", "h86.26", "v-38.4" ] ],
+    [ "ultrasonic1:TRIG", "pico:GP26", "violet", [ "v9.6", "h-230.8", "v-163.2" ] ],
+    [
+      "ultrasonic1:ECHO",
+      "pico:GP27",
+      "magenta",
+      [ "v19.2", "h-202.4", "v-201.6", "h-38.4", "v19.2" ]
+    ]
+  ],
+  "dependencies": {}
+}

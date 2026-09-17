@@ -1,0 +1,357 @@
+[
+    {
+        "id": "8eedde208e569f58",
+        "type": "tab",
+        "label": "Smart Garage Parking System",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "f6ef1ff9ddecc464",
+        "type": "mqtt in",
+        "z": "8eedde208e569f58",
+        "name": "",
+        "topic": "garage/garage_events",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "11ab4da9d2fc15c2",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 140,
+        "y": 20,
+        "wires": [
+            [
+                "d99e61a876d3916e",
+                "190a3299b59dc65c"
+            ]
+        ]
+    },
+    {
+        "id": "8f0896ce09059ccc",
+        "type": "debug",
+        "z": "8eedde208e569f58",
+        "name": "debug 14",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 820,
+        "y": 20,
+        "wires": []
+    },
+    {
+        "id": "d99e61a876d3916e",
+        "type": "function",
+        "z": "8eedde208e569f58",
+        "name": "function 7",
+        "func": "let rawPayload = msg.payload;\n\n// 1. Parse raw payload safely\nlet msgObj;\ntry {\n    msgObj = typeof rawPayload === \"string\" ? JSON.parse(rawPayload) : rawPayload;\n} catch (e) {\n    node.error(\"Failed to parse JSON: \" + rawPayload);\n    return null;\n}\n\nlet eventType = msgObj.event;\nlet cardId = msgObj.card_id;\nlet duration = msgObj.duration_sec || 0;\n\nlet textMessage = \"\";\nlet telegramMessage = \"\";\nlet gaugeValue = 0;\n\n// 2. Process events\nif (eventType === \"PARKING_STATUS\") {\n    if (cardId === \"EMPTY\") {\n        gaugeValue = 0;\n        textMessage = \"Parking Status: EMPTY (Green LED ON)\";\n        telegramMessage = \"🟢 Garage Status: Completely EMPTY\";\n    } else if (cardId === \"HALF_FULL\") {\n        gaugeValue = 50;\n        textMessage = \"Parking Status: HALF FULL\";\n        telegramMessage = \"🟡 Garage Status: HALF FULL\";\n    } else if (cardId === \"FULL\") {\n        gaugeValue = 100;\n        textMessage = \"Parking Status: FULL (Red LED ON)\";\n        telegramMessage = \"🔴 Garage Status: Completely FULL!\";\n    }\n} else {\n    if (eventType === \"ENTRY\") {\n        textMessage = `Car Entered! Card: ${cardId}`;\n        telegramMessage = `🚗 Car successfully entered\\n- Card ID: ${cardId}`;\n    }\n    else if (eventType === \"EXIT\") {\n        textMessage = `Car Left. Duration: ${duration}s`;\n        telegramMessage = `🚙 Car left the garage\\n- Card ID: ${cardId}\\n- Parking Duration: ${duration} seconds`;\n    }\n    else if (eventType === \"WARNING_TOO_FAR\") {\n        textMessage = `Warning: Car too far from sensor!`;\n        telegramMessage = `⚠️ Warning: Car is too far from the ultrasonic sensor!`;\n    }\n    else if (eventType === \"DENIED_ATTEMPT\") {\n        textMessage = `Access Denied! Unauthorized Card.`;\n        telegramMessage = `❌ Access Denied (Unauthorized Card): ${cardId}`;\n    }\n\n    gaugeValue = null;\n}\n\n// 3. Define your Telegram Chat ID here so the sender node gets it explicitly\nlet myChatId = \"5525837447\";\n\n// Output 1: Telegram Sender (includes chatId, type, and content to avoid any missing property errors)\nlet telegramOut = {\n    payload: {\n        chatId: myChatId,\n        type: \"message\",\n        content: telegramMessage\n    }\n};\n\n// Output 2: Text Dashboard Node\nlet textOut = { payload: textMessage };\n\n// Output 3: Gauge Dashboard Node\nlet gaugeOut = (gaugeValue !== null) ? { payload: gaugeValue } : null;\n\nreturn [telegramOut, textOut, gaugeOut];",
+        "outputs": 3,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 40,
+        "wires": [
+            [
+                "83b0e4a1fc3c60b9"
+            ],
+            [
+                "2f2add4342d22eca"
+            ],
+            [
+                "c471b53927d3b723"
+            ]
+        ]
+    },
+    {
+        "id": "83b0e4a1fc3c60b9",
+        "type": "telegram sender",
+        "z": "8eedde208e569f58",
+        "name": "",
+        "bot": "bde4c29a3199294c",
+        "haserroroutput": false,
+        "outputs": 1,
+        "x": 650,
+        "y": 20,
+        "wires": [
+            [
+                "8f0896ce09059ccc"
+            ]
+        ]
+    },
+    {
+        "id": "9b566674249b1e1a",
+        "type": "e-mail",
+        "z": "8eedde208e569f58",
+        "server": "smtp.gmail.com",
+        "port": "465",
+        "authtype": "BASIC",
+        "saslformat": true,
+        "token": "oauth2Response.access_token",
+        "secure": true,
+        "tls": false,
+        "name": "alaa1mohammed9@gmail.com",
+        "dname": "E-mail",
+        "x": 430,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "190a3299b59dc65c",
+        "type": "function",
+        "z": "8eedde208e569f58",
+        "name": "function 8",
+        "func": "let data = msg.payload; \nlet text = \"\";\nlet subject = \"Smart Garage Alert 🚗\";\n\nif (data.event === \"ENTRY\") {\n    text = \"🚗 Garage gate opened and car successfully entered!\\nCard ID: \" + data.card_id;\n    subject = \"Car Entry Notification\";\n} else if (data.event === \"EXIT\") {\n    text = \"👋 A car has left the garage.\\nParking duration: \" + data.duration_sec + \" seconds.\";\n    subject = \"Car Exit Notification\";\n} else if (data.event === \"DENIED_ATTEMPT\") {\n    text = \"🚨 Security Alert! An unauthorized RFID card scan attempt was detected.\\nCard ID: \" + data.card_id;\n    subject = \"Security Alert: Unauthorized Access Attempt!\";\n} else if (data.event === \"PARKING_STATUS\") {\n    text = \"🅿️ Parking status updated: \" + data.card_id;\n    subject = \"Parking Status Update\";\n}\n\nif (text !== \"\") {\n    msg.topic = subject;\n    msg.payload = text;\n    return msg;\n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 100,
+        "y": 80,
+        "wires": [
+            [
+                "9b566674249b1e1a"
+            ]
+        ]
+    },
+    {
+        "id": "c471b53927d3b723",
+        "type": "ui_gauge",
+        "z": "8eedde208e569f58",
+        "name": "",
+        "group": "58457c05f99481bd",
+        "order": 0,
+        "width": "6",
+        "height": "5",
+        "gtype": "donut",
+        "title": "Garage Occupancy",
+        "label": "%",
+        "format": "{{value}}%",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "49",
+        "seg2": "99",
+        "diff": true,
+        "className": "",
+        "x": 730,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "2f2add4342d22eca",
+        "type": "ui-text",
+        "z": "8eedde208e569f58",
+        "group": "5e79e4a979c531d1",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "garage parking",
+        "label": "System Log",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "x": 700,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "11ab4da9d2fc15c2",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "a23483c32a494c009e64526fff6b8fff.s1.eu.hivemq.cloud",
+        "port": "8883",
+        "tls": "",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": true,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "bde4c29a3199294c",
+        "type": "telegram bot",
+        "botname": "@AlaaIoTBot",
+        "usernames": "",
+        "chatids": " 5525837447",
+        "baseapiurl": "",
+        "testenvironment": false,
+        "updatemode": "polling",
+        "pollinterval": 300,
+        "usesocks": false,
+        "sockshost": "",
+        "socksprotocol": "socks5",
+        "socksport": 6667,
+        "socksusername": "anonymous",
+        "sockspassword": "",
+        "bothost": "",
+        "botpath": "",
+        "localbothost": "0.0.0.0",
+        "localbotport": 8443,
+        "publicbotport": 8443,
+        "privatekey": "",
+        "certificate": "",
+        "useselfsignedcertificate": false,
+        "sslterminated": false,
+        "verboselogging": false
+    },
+    {
+        "id": "58457c05f99481bd",
+        "type": "ui_group",
+        "name": "",
+        "tab": "34e505c07a674949",
+        "order": 1,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "5e79e4a979c531d1",
+        "type": "ui-group",
+        "name": " Dashboard",
+        "page": "c6a0e50bcea13dff",
+        "width": 6,
+        "height": 1,
+        "order": -1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "34e505c07a674949",
+        "type": "ui_tab",
+        "name": "Garage Parking",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "c6a0e50bcea13dff",
+        "type": "ui-page",
+        "name": "MY Dadhboard",
+        "ui": "83baa311dd733ac7",
+        "path": "/page2",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "e4f378362eef505f",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": -1,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "83baa311dd733ac7",
+        "type": "ui-base",
+        "name": "My Dashboard",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "headerContent": "page",
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": 1,
+        "showDisconnectNotification": true,
+        "allowInstall": false
+    },
+    {
+        "id": "e4f378362eef505f",
+        "type": "ui-theme",
+        "name": "Default Theme",
+        "colors": {
+            "surface": "#fcfcfd",
+            "primary": "#0d74ce",
+            "bgPage": "#f9f9fb",
+            "groupBg": "#ffffff",
+            "groupOutline": "#d9d9e0"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    },
+    {
+        "id": "dead43fb624517b9",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-contrib-telegrambot": "19.0.3",
+            "node-red-node-email": "5.2.5",
+            "node-red-dashboard": "3.6.6",
+            "@flowfuse/node-red-dashboard": "1.31.0"
+        }
+    }
+]
