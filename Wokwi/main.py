@@ -39,14 +39,14 @@ def connect_wifi():
 connect_wifi()
 
 # --- 3. MQTT Configuration ---
-MQTT_BROKER   = "a23483c32a494c009e64526fff6b8fff.s1.eu.hivemq.cloud"
-MQTT_PORT     = 8883
-MQTT_USER     = "alaamohammed"
-MQTT_PASSWORD = "123456@20"  
+MQTT_BROKER   = "YOUR_URL_MQTT_BROKER"
+MQTT_PORT     = YOUR_PORT
+MQTT_USER     = "YOUR_MQTT_USER"
+MQTT_PASSWORD = "YOUR_MQTT_PASSWORD"  
 MQTT_TOPIC    = b"garage/garage_events"
 
 client = MQTTClient(
-    client_id="pico_garage_alaa_1",
+    client_id="YOUR_CLIENT_ID",
     server=MQTT_BROKER,
     port=MQTT_PORT,
     user=MQTT_USER,
