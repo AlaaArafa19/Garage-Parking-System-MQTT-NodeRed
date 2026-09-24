@@ -40,7 +40,7 @@ connect_wifi()
 
 # --- 3. MQTT Configuration ---
 MQTT_BROKER   = "YOUR_URL_MQTT_BROKER"
-MQTT_PORT     = YOUR_PORT
+MQTT_PORT     = 8883
 MQTT_USER     = "YOUR_MQTT_USER"
 MQTT_PASSWORD = "YOUR_MQTT_PASSWORD"  
 MQTT_TOPIC    = b"garage/garage_events"
